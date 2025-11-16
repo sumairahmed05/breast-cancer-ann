@@ -1,0 +1,41 @@
+import streamlit as st
+import numpy as np
+import pandas as pd
+from tensorflow.keras.models import load_model
+from sklearn.preprocessing import StandardScaler
+import joblib
+
+st.title("Breast Cancer Prediction (ANN Model)")
+
+# Load model
+model = load_model("model.h5")
+
+# Load scaler
+scaler = joblib.load("scaler.pkl")
+
+st.write("Enter the 30 features to predict the cancer type.")
+
+# 30 features input
+feature_names = [
+    'mean radius', 'mean texture', 'mean perimeter', 'mean area', 'mean smoothness',
+    'mean compactness', 'mean concavity', 'mean concave points', 'mean symmetry', 'mean fractal dimension',
+    'radius error', 'texture error', 'perimeter error', 'area error', 'smoothness error',
+    'compactness error', 'concavity error', 'concave points error', 'symmetry error', 'fractal dimension error',
+    'worst radius', 'worst texture', 'worst perimeter', 'worst area', 'worst smoothness',
+    'worst compactness', 'worst concavity', 'worst concave points', 'worst symmetry', 'worst fractal dimension'
+]
+
+inputs = []
+
+for feature in feature_names:
+    value = st.number_input(feature, value=0.0)
+    inputs.append(value)
+
+if st.button("Predict"):
+    data = np.array(inputs).reshape(1, -1)
+    data_scaled = scaler.transform(data)
+    pred = model.predict(data_scaled)
+
+    result = "Malignant (Cancer Detected)" if pred > 0.5 else "Benign (No Cancer)"
+    st.subheader("Prediction Result:")
+    st.write(result)
